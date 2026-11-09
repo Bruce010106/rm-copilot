@@ -1,43 +1,15 @@
 // Server-side client for the agent service. Only used in Server Components,
 // so AGENT_API_URL never reaches the browser.
 
+// Types are generated from the FastAPI OpenAPI schema: run `pnpm gen:api` after backend changes.
+import type { components } from "./api-types";
+
 const BASE = process.env.AGENT_API_URL ?? "http://localhost:8000";
 
-export type CustomerSummary = {
-  id: string;
-  name: string;
-  city: string;
-  tier: string;
-  risk_level: string;
-  aum: string;
-  rm_id: string;
-  tags: string[];
-};
-
-export type CustomerPage = {
-  items: CustomerSummary[];
-  total: number;
-  page: number;
-  page_size: number;
-};
-
-export type CustomerDetail = CustomerSummary & {
-  gender: string;
-  birth_date: string;
-  occupation: string;
-  onboarded_at: string;
-  rm_name: string;
-  holdings: {
-    id: string;
-    product_id: string;
-    product_name: string;
-    category: string;
-    amount: string;
-    start_date: string;
-    maturity_date: string | null;
-  }[];
-  interactions: { id: string; channel: string; occurred_at: string; content: string }[];
-};
+type Schemas = components["schemas"];
+export type CustomerSummary = Schemas["CustomerSummary"];
+export type CustomerPage = Schemas["CustomerPage"];
+export type CustomerDetail = Schemas["CustomerDetail"];
 
 async function get<T>(path: string): Promise<T | null> {
   const res = await fetch(`${BASE}${path}`, { cache: "no-store" });

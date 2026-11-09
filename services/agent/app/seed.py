@@ -26,16 +26,12 @@ def load_dataset(session: Session, data: dict) -> None:
     session.add_all(Product(**p) for p in data["products"])
     session.flush()
     session.add_all(
-        Customer(
-            **{**c, "birth_date": _d(c["birth_date"]), "onboarded_at": _d(c["onboarded_at"])}
-        )
+        Customer(**{**c, "birth_date": _d(c["birth_date"]), "onboarded_at": _d(c["onboarded_at"])})
         for c in data["customers"]
     )
     session.flush()
     session.add_all(
-        Holding(
-            **{**h, "start_date": _d(h["start_date"]), "maturity_date": _d(h["maturity_date"])}
-        )
+        Holding(**{**h, "start_date": _d(h["start_date"]), "maturity_date": _d(h["maturity_date"])})
         for h in data["holdings"]
     )
     session.add_all(

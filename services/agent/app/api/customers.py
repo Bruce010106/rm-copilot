@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, or_, select
-from sqlalchemy.orm import Session, selectinload
+from typing import Annotated
 
-from app.db import get_session
+from fastapi import APIRouter, HTTPException, Query
+from sqlalchemy import func, or_, select
+from sqlalchemy.orm import selectinload
+
+from app.db import SessionDep
 from app.models import Customer, Holding
 from app.schemas import CustomerDetail, CustomerPage, CustomerSummary, HoldingOut, InteractionOut
 
@@ -11,12 +13,12 @@ router = APIRouter(prefix="/customers", tags=["customers"])
 
 @router.get("", response_model=CustomerPage)
 def list_customers(
-    q: str | None = Query(None, description="按姓名或客户 ID 搜索"),
+    session: SessionDep,
+    q: Annotated[str | None, Query(description="按姓名或客户 ID 搜索")] = None,
     tier: str | None = None,
     rm_id: str | None = None,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    session: Session = Depends(get_session),
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> CustomerPage:
     stmt = select(Customer)
     if q:
@@ -39,7 +41,7 @@ def list_customers(
 
 
 @router.get("/{customer_id}", response_model=CustomerDetail)
-def get_customer(customer_id: str, session: Session = Depends(get_session)) -> CustomerDetail:
+def get_customer(customer_id: str, session: SessionDep) -> CustomerDetail:
     customer = session.scalar(
         select(Customer)
         .where(Customer.id == customer_id)

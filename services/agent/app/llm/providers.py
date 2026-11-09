@@ -67,4 +67,4 @@ class OpenAICompatibleProvider:
         )
 
 
-__all__ = ["ChatMessage", "MockProvider", "AnthropicProvider", "OpenAICompatibleProvider"]
+__all__ = ["AnthropicProvider", "ChatMessage", "MockProvider", "OpenAICompatibleProvider"]

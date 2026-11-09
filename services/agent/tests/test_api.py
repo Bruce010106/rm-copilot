@@ -27,8 +27,9 @@ def test_customer_not_found(client):
 
 
 def test_generator_is_deterministic(generated):
-    from tests.conftest import _load_generator
     from datetime import date
+
+    from tests.conftest import _load_generator
 
     again = _load_generator().generate(n_customers=30, seed=7, as_of=date(2026, 11, 1))
     assert again == generated
