@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     openai_api_key: str = ""
     openai_base_url: str = ""
+    # USD per million tokens, for models missing from app.llm.pricing.PRICES.
+    llm_price_input_per_mtok: float | None = None
+    llm_price_output_per_mtok: float | None = None
 
 
 @lru_cache
