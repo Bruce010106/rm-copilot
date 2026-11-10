@@ -1,5 +1,18 @@
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatWan, listCustomers } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 const TIERS = ["钻石", "铂金", "黄金", "普通"];
 
@@ -17,66 +30,75 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-xl font-semibold">客户（{data.total}）</h1>
-        <form className="flex flex-wrap gap-2 text-sm">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="姓名或客户 ID"
-            className="rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5"
-          />
+        <h1 className="text-xl font-semibold">
+          客户 <span className="text-muted-foreground font-normal">{data.total}</span>
+        </h1>
+        <form className="flex flex-wrap gap-2">
+          <Input name="q" defaultValue={q} placeholder="姓名或客户 ID" className="w-44" />
           <select
             name="tier"
             defaultValue={tier ?? ""}
-            className="rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1.5"
+            className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm"
           >
             <option value="">全部等级</option>
             {TIERS.map((t) => (
               <option key={t}>{t}</option>
             ))}
           </select>
-          <button className="rounded bg-[var(--accent)] px-3 py-1.5 text-white">筛选</button>
+          <Button type="submit">筛选</Button>
         </form>
       </div>
 
-      <div className="overflow-x-auto rounded border border-[var(--border)] bg-[var(--card)]">
-        <table className="w-full text-sm">
-          <thead className="text-left text-[var(--muted)]">
-            <tr className="border-b border-[var(--border)]">
-              <th className="px-3 py-2 font-normal">客户</th>
-              <th className="px-3 py-2 font-normal">城市</th>
-              <th className="px-3 py-2 font-normal">等级</th>
-              <th className="px-3 py-2 font-normal">风险</th>
-              <th className="px-3 py-2 text-right font-normal">AUM</th>
-              <th className="px-3 py-2 font-normal">客户经理</th>
-            </tr>
-          </thead>
-          <tbody>
+      <Card className="py-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>客户</TableHead>
+              <TableHead>城市</TableHead>
+              <TableHead>等级</TableHead>
+              <TableHead>风险</TableHead>
+              <TableHead className="text-right">AUM</TableHead>
+              <TableHead>客户经理</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {data.items.map((c) => (
-              <tr key={c.id} className="border-b border-[var(--border)] last:border-0">
-                <td className="px-3 py-2">
-                  <Link href={`/customers/${c.id}`} className="text-[var(--accent)] hover:underline">
+              <TableRow key={c.id}>
+                <TableCell>
+                  <Link href={`/customers/${c.id}`} className="text-primary hover:underline">
                     {c.name}
                   </Link>
-                  <span className="ml-2 text-xs text-[var(--muted)]">{c.id}</span>
-                </td>
-                <td className="px-3 py-2">{c.city}</td>
-                <td className="px-3 py-2">{c.tier}</td>
-                <td className="px-3 py-2">{c.risk_level}</td>
-                <td className="px-3 py-2 text-right tabular-nums">{formatWan(c.aum)}</td>
-                <td className="px-3 py-2">{c.rm_id}</td>
-              </tr>
+                  <span className="text-muted-foreground ml-2 text-xs">{c.id}</span>
+                </TableCell>
+                <TableCell>{c.city}</TableCell>
+                <TableCell>
+                  <Badge variant={c.tier === "钻石" || c.tier === "铂金" ? "default" : "secondary"}>
+                    {c.tier}
+                  </Badge>
+                </TableCell>
+                <TableCell>{c.risk_level}</TableCell>
+                <TableCell className="text-right tabular-nums">{formatWan(c.aum)}</TableCell>
+                <TableCell>{c.rm_id}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
 
-      <div className="flex items-center justify-end gap-3 text-sm">
-        {pageNum > 1 && <Link href={href(pageNum - 1)}>上一页</Link>}
-        <span className="text-[var(--muted)]">
+      <div className="flex items-center justify-end gap-2 text-sm">
+        {pageNum > 1 && (
+          <Link href={href(pageNum - 1)} className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+            上一页
+          </Link>
+        )}
+        <span className="text-muted-foreground px-2">
           {pageNum} / {lastPage}
         </span>
-        {pageNum < lastPage && <Link href={href(pageNum + 1)}>下一页</Link>}
+        {pageNum < lastPage && (
+          <Link href={href(pageNum + 1)} className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+            下一页
+          </Link>
+        )}
       </div>
     </div>
   );

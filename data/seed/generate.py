@@ -23,7 +23,17 @@ from faker import Faker
 OUT_DIR = Path(__file__).parent / "output"
 
 CITIES = ["上海", "北京", "深圳", "杭州", "广州", "成都", "南京", "苏州", "武汉", "厦门"]
-OCCUPATIONS = ["企业主", "企业高管", "医生", "律师", "金融从业者", "互联网从业者", "公务员", "退休人士", "自由职业"]
+OCCUPATIONS = [
+    "企业主",
+    "企业高管",
+    "医生",
+    "律师",
+    "金融从业者",
+    "互联网从业者",
+    "公务员",
+    "退休人士",
+    "自由职业",
+]
 RISK_LEVELS = ["R1", "R2", "R3", "R4", "R5"]
 CHANNELS = ["电话", "企微", "面谈", "活动"]
 
@@ -38,7 +48,10 @@ PRODUCT_SPECS = {
 
 # KYC signal -> phrases a customer might say. Planted into interactions; recorded in truth.json.
 SIGNALS: dict[str, list[str]] = {
-    "子女教育": ["孩子明年准备出国读书，想提前规划一笔教育金", "女儿在考虑去英国读研，学费要早点准备"],
+    "子女教育": [
+        "孩子明年准备出国读书，想提前规划一笔教育金",
+        "女儿在考虑去英国读研，学费要早点准备",
+    ],
     "养老规划": ["快退休了，想看看养老怎么安排比较稳", "最近在想退休后的现金流问题"],
     "企业经营": ["公司今年在扩产线，现金流有点紧", "厂里刚接了个大单，下半年回款会比较多"],
     "风险厌恶": ["上次权益产品回撤让我挺难受的，还是稳一点好", "不想再碰波动大的产品了"],
@@ -74,23 +87,27 @@ def generate(n_customers: int, seed: int, as_of: date) -> tuple[dict, dict]:
 
     rms = []
     for i in range(8):
-        rms.append({
-            "id": f"RM{i + 1:03d}",
-            "name": fake.name(),
-            "team": f"财富{i // 4 + 1}组",
-            "role": "manager" if i % 4 == 0 else "rm",
-        })
+        rms.append(
+            {
+                "id": f"RM{i + 1:03d}",
+                "name": fake.name(),
+                "team": f"财富{i // 4 + 1}组",
+                "role": "manager" if i % 4 == 0 else "rm",
+            }
+        )
     serving_rms = [r for r in rms if r["role"] == "rm"]
 
     products = []
     for category, (risk, names, _) in PRODUCT_SPECS.items():
         for name in names:
-            products.append({
-                "id": f"P{len(products) + 1:03d}",
-                "name": f"{name}{'' if category == '保险' else '理财'}",
-                "category": category,
-                "risk_level": risk,
-            })
+            products.append(
+                {
+                    "id": f"P{len(products) + 1:03d}",
+                    "name": f"{name}{'' if category == '保险' else '理财'}",
+                    "category": category,
+                    "risk_level": risk,
+                }
+            )
     has_maturity = {p["id"]: PRODUCT_SPECS[p["category"]][2] for p in products}
 
     customers, holdings, interactions = [], [], []
@@ -114,14 +131,16 @@ def generate(n_customers: int, seed: int, as_of: date) -> tuple[dict, dict]:
             if has_maturity[p["id"]]:
                 # Spread maturities from -30 to +180 days around as_of: some due soon.
                 maturity = as_of + timedelta(days=rng.randint(-30, 180))
-            holdings.append({
-                "id": f"H{len(holdings) + 1:06d}",
-                "customer_id": cid,
-                "product_id": p["id"],
-                "amount": amount,
-                "start_date": start.isoformat(),
-                "maturity_date": maturity.isoformat() if maturity else None,
-            })
+            holdings.append(
+                {
+                    "id": f"H{len(holdings) + 1:06d}",
+                    "customer_id": cid,
+                    "product_id": p["id"],
+                    "amount": amount,
+                    "start_date": start.isoformat(),
+                    "maturity_date": maturity.isoformat() if maturity else None,
+                }
+            )
             aum += amount
 
         planted = rng.sample(list(SIGNALS), k=rng.choice([0, 1, 1, 2, 2, 3]))
@@ -141,29 +160,33 @@ def generate(n_customers: int, seed: int, as_of: date) -> tuple[dict, dict]:
                 evidence.append({"signal": signal, "interaction_id": iid, "phrase": phrase})
             else:
                 content = f"{rng.choice(NEUTRAL_LINES)}。"
-            interactions.append({
-                "id": iid,
-                "customer_id": cid,
-                "rm_id": rm["id"],
-                "channel": rng.choice(CHANNELS),
-                "occurred_at": occurred.isoformat(timespec="minutes"),
-                "content": content,
-            })
+            interactions.append(
+                {
+                    "id": iid,
+                    "customer_id": cid,
+                    "rm_id": rm["id"],
+                    "channel": rng.choice(CHANNELS),
+                    "occurred_at": occurred.isoformat(timespec="minutes"),
+                    "content": content,
+                }
+            )
 
-        customers.append({
-            "id": cid,
-            "name": fake.name(),
-            "gender": rng.choice(["男", "女"]),
-            "birth_date": birth.isoformat(),
-            "city": rng.choice(CITIES),
-            "occupation": occupation,
-            "tier": tier_for(aum),
-            "risk_level": rng.choice(RISK_LEVELS),
-            "aum": round(aum, 2),
-            "rm_id": rm["id"],
-            "onboarded_at": onboarded.isoformat(),
-            "tags": [],  # filled later by the KYC agent, never by the generator
-        })
+        customers.append(
+            {
+                "id": cid,
+                "name": fake.name(),
+                "gender": rng.choice(["男", "女"]),
+                "birth_date": birth.isoformat(),
+                "city": rng.choice(CITIES),
+                "occupation": occupation,
+                "tier": tier_for(aum),
+                "risk_level": rng.choice(RISK_LEVELS),
+                "aum": round(aum, 2),
+                "rm_id": rm["id"],
+                "onboarded_at": onboarded.isoformat(),
+                "tags": [],  # filled later by the KYC agent, never by the generator
+            }
+        )
         truth[cid] = {"signals": sorted(planted), "evidence": evidence}
 
     dataset = {
@@ -178,7 +201,9 @@ def generate(n_customers: int, seed: int, as_of: date) -> tuple[dict, dict]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument("--customers", type=int, default=300)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--as-of", type=date.fromisoformat, default=date.today())

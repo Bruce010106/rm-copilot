@@ -1,5 +1,7 @@
 # RM Copilot
 
+[![CI](https://github.com/Bruce010106/rm-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/Bruce010106/rm-copilot/actions/workflows/ci.yml)
+
 客户经理（Relationship Manager）的 AI 工作台：让 Agent **安全地**参与客户经营——回答有证据、写操作要审批、指标口径统一、效果可评测。
 
 > 全部数据为合成数据（`data/seed`），不含任何真实客户或公司信息。
@@ -43,6 +45,18 @@ pnpm dev                                  # http://localhost:3000
 ```
 
 测试：`cd services/agent && pytest`（用内存 SQLite，不依赖 docker）。
+
+## 开发约定
+
+- **接口类型**：前端类型由后端 OpenAPI 自动生成，不手写。改了后端接口后：
+  ```bash
+  cd services/agent && python scripts/export_openapi.py   # 更新 apps/web/openapi.json
+  cd apps/web && pnpm gen:api                              # 更新 lib/api-types.ts
+  ```
+  CI 会检查这两个文件是否最新。
+- **代码规范**：Python 用 `ruff check` + `ruff format`；前端用 `pnpm typecheck`。
+- **UI 组件**：shadcn/ui（`components/ui`），用 `pnpm dlx shadcn@latest add <组件>` 添加。
+- **流程**：每个功能对应一个 Issue，开分支、提 PR，CI 通过后合并。
 
 ## 路线图
 
