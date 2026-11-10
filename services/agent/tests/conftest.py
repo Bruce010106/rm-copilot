@@ -28,18 +28,22 @@ def generated():
 
 
 @pytest.fixture
-def client(generated):
+def session_factory():
     # In-memory SQLite keeps tests independent of the docker Postgres.
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
     Base.metadata.create_all(engine)
-    TestSession = sessionmaker(bind=engine, expire_on_commit=False)
-    with TestSession() as s:
+    return sessionmaker(bind=engine, expire_on_commit=False)
+
+
+@pytest.fixture
+def client(generated, session_factory):
+    with session_factory() as s:
         load_dataset(s, generated[0])
 
     def override():
-        with TestSession() as s:
+        with session_factory() as s:
             yield s
 
     app.dependency_overrides[get_session] = override

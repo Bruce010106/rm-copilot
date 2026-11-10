@@ -51,3 +51,36 @@ class CustomerDetail(CustomerSummary):
     rm_name: str
     holdings: list[HoldingOut]
     interactions: list[InteractionOut]
+
+
+class LLMCallOut(ORM):
+    id: int
+    created_at: datetime
+    provider: str
+    model: str
+    purpose: str
+    input_tokens: int
+    output_tokens: int
+    latency_ms: int
+    cost_usd: Decimal | None
+    status: str
+    error: str | None
+
+
+class LLMUsageRow(BaseModel):
+    provider: str
+    model: str
+    purpose: str
+    calls: int
+    errors: int
+    unpriced_calls: int
+    input_tokens: int
+    output_tokens: int
+    cost_usd: Decimal
+    avg_latency_ms: int
+
+
+class LLMUsage(BaseModel):
+    total_calls: int
+    total_cost_usd: Decimal
+    rows: list[LLMUsageRow]
